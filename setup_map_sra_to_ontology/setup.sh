@@ -11,6 +11,9 @@
 pip install nltk==3.4
 pip install dill
 
+# Download tokenizer
+python download_nltk_data.py
+
 # Download ontologies
 echo "Downloading ontologies..."
 python download_ontologies.py
