@@ -1,0 +1,4 @@
+map_sra_to_ontology/fuzzy_matching_index/
+map_sra_to_ontology/obo/*.obo
+*.pyc
+map_sra_to_ontology/LEX/L*
