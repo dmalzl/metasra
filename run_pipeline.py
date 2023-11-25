@@ -23,7 +23,7 @@ import predict_sample_type
 from map_sra_to_ontology.load_specialist_lex import SpecialistLexicon
 from map_sra_to_ontology import run_sample_type_predictor
 from predict_sample_type.learn_classifier import *
-from map_sra_to_ontology import pipeline_components as pc
+from map_sra_to_ontology.pipeline_components import *
 
 def main():
     parser = OptionParser()
