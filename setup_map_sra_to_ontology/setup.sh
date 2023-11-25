@@ -8,6 +8,9 @@
 # Example:
 #   export PYTHONPATH=<path to directory containing bktree.py script>:$PYTHONPATH
 
+pip install nltk==3.4
+pip install dill
+
 # Download ontologies
 echo "Downloading ontologies..."
 python download_ontologies.py
