@@ -31,10 +31,13 @@ def main():
     (options, args) = parser.parse_args()
    
     input_f = args[0]
+    output_f = args[1]
      
     # Map key-value pairs to ontologies
     with open(input_f, "r") as f:
         tag_to_vals = json.load(f)
+
+    print tag_to_vals
 
     # Load ontologies
     ont_name_to_ont_id = {
@@ -61,7 +64,7 @@ def main():
         outputs.append(
             run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mappings)
         )
-    print json.dumps(outputs, indent=4, separators=(',', ': '))
+    json.dump(outputs, output_f, indent=4, separators=(',', ': '))
 
 def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data): 
     
