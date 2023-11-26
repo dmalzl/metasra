@@ -1,3 +1,5 @@
+**This is a fork of the original [MetaSRA-pipeline repository](https://github.com/deweylab/MetaSRA-pipeline) where I fixed a couple of installation and execution issues like missing packages, outdated download links and wrong import statements. I also added support of an outputfile and a key, value style JSON input to support indexing with an ID key for in- and output. Additionally, this implementation also adds multithreading for the normalization stage to increase throughput (this feature is still in the works though)**
+
 # MetaSRA: normalized human sample-specific metadata for the Sequence Read Archive
 
 This repository contains the code implementing the pipeline used to construct the MetaSRA database described in our publication: https://doi.org/10.1093/bioinformatics/btx334.
@@ -14,7 +16,8 @@ This project requires the following Python libraries:
 - scikit-learn (http://scikit-learn.org/stable/)
 - setuptools (https://pypi.python.org/pypi/setuptools)
 - marisa-trie (https://pypi.python.org/pypi/marisa-trie)
-
+- nltk (https://www.nltk.org/)
+- dill (https://pypi.org/project/dill/)
 
 ## Setup
 
@@ -35,21 +38,19 @@ using the run_pipeline.py script. This script is used as follows:
 The script accepts as input a JSON file storing a list of sets of key-value pairs.
 For example, the pipeline will accept a file with the following content:
 
-    [
-      {   
-        "ID": "P352_141",
+    {
+      "P352_141": {   
         "age": "48",
         "bmi": "24",
         "gender": "female",
         "source_name": "vastus lateralis muscle_female",
         "tissue": "vastus lateralis muscle"
       },
-      {   
-        "ID": "P352_141",
+      "P352_141": {   
         "age": "29",
         "bmi": "30",
         "gender": "male",
         "source_name": "vastus lateralis muscle_female",
         "tissue": "vastus lateralis muscle"
       }
-     ]
+    }
