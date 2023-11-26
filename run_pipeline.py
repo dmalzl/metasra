@@ -51,9 +51,13 @@ def main():
     pipeline = p_53()
 
     all_mappings = dict()
+    metadata_normalizer = partial(
+        normalize_metadata, 
+        pipeline = pipeline
+    )
     if n_processes > 1:
         p = mp.Pool(n_processes)
-        for k, mappings in p.map(normalize_metadata, tag_to_vals.items()):
+        for k, mappings in p.map(metadata_normalizer, tag_to_vals.items()):
             all_mappings[k] = mappings
     
         p.close()
@@ -90,7 +94,7 @@ def main():
         json.dump(outputs, f, indent=4, separators=(',', ': '))
 
 
-def normalize_metadata(tag_to_val_item):
+def normalize_metadata(tag_to_val_item, pipeline):
     k, tag_to_val = tag_to_val_item
     mapped_terms, real_props = pipeline.run(tag_to_val)
     mappings = {
