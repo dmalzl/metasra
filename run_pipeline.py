@@ -37,8 +37,6 @@ def main():
     with open(input_f, "r") as f:
         tag_to_vals = json.load(f)
 
-    print tag_to_vals
-
     # Load ontologies
     ont_name_to_ont_id = {
         "UBERON":"12",
@@ -49,22 +47,23 @@ def main():
     ont_id_to_og = {x:load_ontology.load(x)[0] for x in ont_name_to_ont_id.values()}
     pipeline = p_53()
 
-    all_mappings = []
-    for tag_to_val in tag_to_vals:
+    all_mappings = dict()
+    for k, tag_to_val in tag_to_vals.items():
         sample_acc_to_matches = {}
         mapped_terms, real_props = pipeline.run(tag_to_val)
         mappings = {
             "mapped_terms":[x.to_dict() for x in mapped_terms],
             "real_value_properties": [x.to_dict() for x in real_props]
         }
-        all_mappings.append(mappings)
+        all_mappings[k] = mappings
 
-    outputs = []
-    for tag_to_val, mappings in zip(tag_to_vals, all_mappings):
-        outputs.append(
-            run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mappings)
-        )
-    json.dump(outputs, output_f, indent=4, separators=(',', ': '))
+    outputs = dict()
+    for k, tag_to_val in tag_to_vals.items():
+        mappings = all_mappings[k]
+        outputs[k] = run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mappings)
+
+    with open(output_f, 'w') as f:
+        json.dump(outputs, f, indent=4, separators=(',', ': '))
 
 def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data): 
     
