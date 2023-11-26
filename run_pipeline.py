@@ -14,7 +14,6 @@ import json
 import dill
 import os
 from os.path import join
-import multiprocessing as mp
 from functools import partial
 
 import map_sra_to_ontology
@@ -34,7 +33,6 @@ def main():
    
     input_f = args[0]
     output_f = args[1]
-    n_processes = int(args[2])
      
     # Map key-value pairs to ontologies
     with open(input_f, "r") as f:
@@ -46,7 +44,9 @@ def main():
         "CL":"1",
         "DOID":"2",
         "EFO":"16",
-        "CVCL":"4"}
+        "CVCL":"4"
+    }
+
     ont_id_to_og = {x:load_ontology.load(x)[0] for x in ont_name_to_ont_id.values()}
     pipeline = p_53()
 
@@ -55,17 +55,8 @@ def main():
         normalize_metadata, 
         pipeline = pipeline
     )
-    if n_processes > 1:
-        p = mp.Pool(n_processes)
-        for k, mappings in p.map(metadata_normalizer, tag_to_vals.items()):
-            all_mappings[k] = mappings
-    
-        p.close()
-        p.join()
-
-    else:
-        for k, mappings in map(normalize_metadata, tag_to_vals.items()):
-            all_mappings[k] = mappings
+    for k, mappings in map(normalize_metadata, tag_to_vals.items()):
+        all_mappings[k] = mappings
 
     outputs = dict()
     generate_output = partial(
@@ -77,18 +68,8 @@ def main():
         all_mappings
     )
 
-    if n_processes > 1:
-        p = mp.Pool(n_processes)
-        for k, output in p.map(generate_output, tags_and_mappings_iterator):
-            outputs[k] = output
-
-        p.close()
-        p.join()
-
-    else:
-        for k, output in map(generate_output, tags_and_mappings_iterator):
-            outputs[k] = output
-        
+    for k, output in map(generate_output, tags_and_mappings_iterator):
+        outputs[k] = output
 
     with open(output_f, 'w') as f:
         json.dump(outputs, f, indent=4, separators=(',', ': '))
