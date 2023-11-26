@@ -14,6 +14,8 @@ import json
 import dill
 import os
 from os.path import join
+import multiprocessing as mp
+from functools import partial
 
 import map_sra_to_ontology
 from map_sra_to_ontology import ontology_graph
@@ -32,6 +34,7 @@ def main():
    
     input_f = args[0]
     output_f = args[1]
+    n_processes = int(args[2])
      
     # Map key-value pairs to ontologies
     with open(input_f, "r") as f:
@@ -48,25 +51,67 @@ def main():
     pipeline = p_53()
 
     all_mappings = dict()
-    for k, tag_to_val in tag_to_vals.items():
-        sample_acc_to_matches = {}
-        mapped_terms, real_props = pipeline.run(tag_to_val)
-        mappings = {
-            "mapped_terms":[x.to_dict() for x in mapped_terms],
-            "real_value_properties": [x.to_dict() for x in real_props]
-        }
-        all_mappings[k] = mappings
+    if n_processes > 1:
+        p = mp.Pool(n_processes)
+        for k, mappings in p.map(normalize_metadata, tag_to_vals.items()):
+            all_mappings[k] = mappings
+    
+        p.close()
+        p.join()
+
+    else:
+        for k, mappings in map(normalize_metadata, tag_to_vals.items()):
+            all_mappings[k] = mappings
 
     outputs = dict()
-    for k, tag_to_val in tag_to_vals.items():
-        mappings = all_mappings[k]
-        outputs[k] = run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mappings)
+    generate_output = partial(
+        predict_sample_type, 
+        ont_id_to_og = ont_id_to_og
+    )
+    tags_and_mappings_iterator = iter_tags_and_mappings(
+        tag_to_vals, 
+        all_mappings
+    )
+
+    if n_processes > 1:
+        p = mp.Pool(n_processes)
+        for k, output in p.map(generate_output, tags_and_mappings_iterator):
+            outputs[k] = output
+
+        p.close()
+        p.join()
+
+    else:
+        for k, output in map(generate_output, tags_and_mappings_iterator):
+            outputs[k] = output
+        
 
     with open(output_f, 'w') as f:
         json.dump(outputs, f, indent=4, separators=(',', ': '))
 
-def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data): 
+
+def normalize_metadata(tag_to_val_item):
+    k, tag_to_val = tag_to_val_item
+    mapped_terms, real_props = pipeline.run(tag_to_val)
+    mappings = {
+        "mapped_terms":[x.to_dict() for x in mapped_terms],
+        "real_value_properties": [x.to_dict() for x in real_props]
+    }
+    return k, mappings
+
+
+def iter_tags_and_mappings(tag_to_vals, all_mappings):
+    for k, tag_to_val in tag_to_vals:
+        mappings = all_mappings[k]
+        yield k, tag_to_val, mappings
+
+
+def predict_sample_type(tags_and_mappings, ont_id_to_og):
+    k, tag_to_val, mappings = tags_and_mappings
+    return k, run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mappings)
     
+
+def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data): 
     mapped_terms = []
     real_val_props = []
     for mapped_term_data in mapping_data["mapped_terms"]:
@@ -103,18 +148,6 @@ def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data):
         "sample-type confidence": confidence}
 
     return mapping_data
-    #print json.dumps(mapping_data, indent=4, separators=(',', ': '))
-
-
-#def run_pipeline(tag_to_val, pipeline):
-#    pipeline = p_48()
-#    sample_acc_to_matches = {}
-#    mapped_terms, real_props = pipeline.run(tag_to_val)
-#    mappings = {
-#        "mapped_terms":[x.to_dict() for x in mapped_terms], 
-#        "real_value_properties": [x.to_dict() for x in real_props]
-#    }
-#    return mappings
     
 
 def p_53():
