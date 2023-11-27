@@ -1,4 +1,4 @@
-**This is a fork of the original [MetaSRA-pipeline repository](https://github.com/deweylab/MetaSRA-pipeline) where I fixed a couple of installation and execution issues like missing packages, outdated download links and wrong import statements. I also added support of an outputfile and a key, value style JSON input to support indexing with an ID key for in- and output. Additionally, this implementation also adds multithreading for the normalization stage to increase throughput (this feature is still in the works though)**
+**This is a fork of the original [MetaSRA-pipeline repository](https://github.com/deweylab/MetaSRA-pipeline) where I fixed a couple of installation and execution issues like missing packages, outdated download links and wrong import statements. I also added support of an outputfile and a key, value style JSON input to support indexing with an ID key for in- and output**
 
 # MetaSRA: normalized human sample-specific metadata for the Sequence Read Archive
 
