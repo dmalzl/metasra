@@ -33,7 +33,7 @@ This script will download the latest ontology OBO files, the SPECIALIST Lexicon 
 The pipeline can be run on a set of sample-specific key-value pairs
 using the run_pipeline.py script. This script is used as follows:
 
-    python run_pipeline.py <input key-value pairs JSON file>
+    python run_pipeline.py <input key-value pairs JSON file> <name of output JSON file>
 
 The script accepts as input a JSON file storing a list of sets of key-value pairs.
 For example, the pipeline will accept a file with the following content:
