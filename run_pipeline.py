@@ -55,7 +55,7 @@ def main():
         normalize_metadata, 
         pipeline = pipeline
     )
-    for k, mappings in map(normalize_metadata, tag_to_vals.items()):
+    for k, mappings in map(metadata_normalizer, tag_to_vals.items()):
         all_mappings[k] = mappings
 
     outputs = dict()
