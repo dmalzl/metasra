@@ -103,7 +103,9 @@ def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data):
         term_id = mapped_term_data["term_id"]
         for ont in ont_id_to_og.values():
             if term_id in ont.get_mappable_term_ids():
-                mapped_terms.append(term_id)
+                # mapped_terms.append(term_id)
+                term = ont.id_to_term[term_id]
+                mapped_terms.append(f'{term_id}|{term}')
                 break
     for real_val_data in mapping_data["real_value_properties"]:
         real_val_prop = {
@@ -114,11 +116,11 @@ def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data):
         real_val_props.append(real_val_prop)
 
     # Add super-terms of mapped terms to the list of ontology term features   
-    sup_terms = Set()
-    for og in ont_id_to_og.values():
-        for term_id in mapped_terms:
-            sup_terms.update(og.recursive_relationship(term_id, ['is_a', 'part_of']))
-    mapped_terms = list(sup_terms)
+    # sup_terms = Set()
+    # for og in ont_id_to_og.values():
+    #     for term_id in mapped_terms:
+    #         sup_terms.update(og.recursive_relationship(term_id, ['is_a', 'part_of']))
+    # mapped_terms = list(sup_terms)
 
     predicted, confidence = run_sample_type_predictor.run_sample_type_prediction(
         tag_to_val, 
