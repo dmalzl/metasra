@@ -86,7 +86,7 @@ def normalize_metadata(tag_to_val_item, pipeline):
 
 
 def iter_tags_and_mappings(tag_to_vals, all_mappings):
-    for k, tag_to_val in tag_to_vals:
+    for k, tag_to_val in tag_to_vals.items():
         mappings = all_mappings[k]
         yield k, tag_to_val, mappings
 
