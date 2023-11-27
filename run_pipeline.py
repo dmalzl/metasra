@@ -104,8 +104,12 @@ def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data):
         for ont in ont_id_to_og.values():
             if term_id in ont.get_mappable_term_ids():
                 # mapped_terms.append(term_id)
-                term = ont.id_to_term[term_id]
-                mapped_terms.append(f'{term_id}|{term}')
+                mapped_terms.append(
+                    "{term_id}|{term}".format(
+                        term_id = term_id, 
+                        term = ont.id_to_term[term_id]
+                    )
+                )
                 break
     for real_val_data in mapping_data["real_value_properties"]:
         real_val_prop = {
