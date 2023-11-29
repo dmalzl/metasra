@@ -11,9 +11,8 @@ from predict_sample_type.learn_classifier import *
 # directory
 sys.path.append(pr.resource_filename(__name__, "predict_sample_type"))
 
-def run_sample_type_prediction(tag_to_val, mapped_terms, real_props):
 
-    # Load the dilled vectorizer and model
+def load_vectorizer_and_classifier():
     vectorizer_f = pr.resource_filename(__name__, join("predict_sample_type", "sample_type_vectorizor.dill"))
     classifier_f = pr.resource_filename(__name__, join("predict_sample_type", "sample_type_classifier.dill"))
     with open(vectorizer_f, "rb") as f:
@@ -21,6 +20,10 @@ def run_sample_type_prediction(tag_to_val, mapped_terms, real_props):
     with open(classifier_f, "rb") as f:
         model = dill.load(f)
 
+    return vectorizer, model
+
+
+def run_sample_type_prediction(tag_to_val, mapped_terms, real_props, vectorizer, model):
     # Make sample-type prediction
     feat_v = vectorizer.convert_to_features(
         get_ngrams_from_tag_to_val(tag_to_val),

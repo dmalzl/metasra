@@ -33,7 +33,7 @@ def main():
    
     input_f = args[0]
     output_f = args[1]
-     
+
     # Map key-value pairs to ontologies
     with open(input_f, "r") as f:
         tag_to_vals = json.load(f)
@@ -46,8 +46,15 @@ def main():
         "EFO":"16",
         "CVCL":"4"
     }
-
     ont_id_to_og = {x:load_ontology.load(x)[0] for x in ont_name_to_ont_id.values()}
+
+    # this is necessary since the classifier comes with its own copy of the CVCL ontology
+    # which results in KeyErrors during the prediction stage when new entries are queried
+
+    print "load vectorizer and classifier and substitute CVCL ontology tree in classifier"
+    vectorizer, classifier = run_sample_type_predictor.load_vectorizer_and_classifier()
+    classifier.cvcl_og = ont_id_to_og['4']
+
     pipeline = p_53()
 
     all_mappings = dict()
@@ -61,7 +68,9 @@ def main():
     outputs = dict()
     generate_output = partial(
         predict_sample_type, 
-        ont_id_to_og = ont_id_to_og
+        ont_id_to_og = ont_id_to_og,
+        vectorizer = vectorizer,
+        classifier = classifier
     )
     tags_and_mappings_iterator = iter_tags_and_mappings(
         tag_to_vals, 
@@ -77,6 +86,7 @@ def main():
 
 def normalize_metadata(tag_to_val_item, pipeline):
     k, tag_to_val = tag_to_val_item
+    print 'mapping item', k, tag_to_val
     mapped_terms, real_props = pipeline.run(tag_to_val)
     mappings = {
         "mapped_terms":[x.to_dict() for x in mapped_terms],
@@ -91,12 +101,12 @@ def iter_tags_and_mappings(tag_to_vals, all_mappings):
         yield k, tag_to_val, mappings
 
 
-def predict_sample_type(tags_and_mappings, ont_id_to_og):
+def predict_sample_type(tags_and_mappings, ont_id_to_og, vectorizer, classifier):
     k, tag_to_val, mappings = tags_and_mappings
-    return k, run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mappings)
+    return k, run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mappings, vectorizer, classifier)
     
 
-def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data): 
+def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data, vectorizer, classifier): 
     mapped_term_ids = []
     mapped_terms = []
     real_val_props = []
@@ -130,7 +140,9 @@ def run_pipeline_on_key_vals(tag_to_val, ont_id_to_og, mapping_data):
     predicted, confidence = run_sample_type_predictor.run_sample_type_prediction(
         tag_to_val, 
         mapped_term_ids, 
-        real_val_props
+        real_val_props,
+        vectorizer,
+        classifier
     )
 
     mapping_data = {
