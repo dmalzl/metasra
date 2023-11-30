@@ -8,16 +8,10 @@
 from optparse import OptionParser
 import json
 from sets import Set
-import sys
-from collections import defaultdict, deque
+from collections import defaultdict
 import json
-import dill
-import os
-from os.path import join
 from functools import partial
 
-import map_sra_to_ontology
-from map_sra_to_ontology import ontology_graph
 from map_sra_to_ontology import load_ontology
 from map_sra_to_ontology import config
 import predict_sample_type

@@ -4,13 +4,11 @@
 #   a trie data structure. Allows for fast query of the lexicon.
 ###############################################################################
 
-from optparse import OptionParser
-import os
 from os.path import join
-from collections import deque, defaultdict
-import json
+from collections import defaultdict
 import marisa_trie
 import pkg_resources as pr
+from unidecode import unidecode
 
 resource_package = __name__
 
@@ -98,6 +96,27 @@ def load_lexicon(lex_loc):
 
     return lexicon
 
+
+def set_to_list(lexicon, key_to_set_values):
+    for eui in lexicon.keys():
+        if key_to_set_values in lexicon[eui]:
+            lexicon[eui][key_to_set_values] = list(lexicon[eui][key_to_set_values])
+    
+    return lexicon
+
+
+def convert_to_ascii_on_unicode_error(string):
+    unicode_string = string.decode('utf-8')
+    try:
+        str(unicode_string)
+    
+    except UnicodeError:
+        print "Encountered unicode to string error in {}. Converting to closest ASCII representation".format(string)
+        string = unidecode(unicode_string)
+    
+    return string
+
+
 def add_trademarks(lexicon):
 
     f_name = pr.resource_filename(resource_package, join("LEX", "LRTRM"))
@@ -105,16 +124,17 @@ def add_trademarks(lexicon):
         for l in f:
             vals = l.strip().split('|')
             eui = vals[0]
-            chem = vals[2]
+            chem = convert_to_ascii_on_unicode_error(vals[2])
 
             if eui not in lexicon:
                 print "WARNING! Attempt trademarks, but %s is not in the lexicon!" % eui
                 continue
 
             if "trademark" not in lexicon[eui]:
-                lexicon[eui]["trademark"] = []
-            lexicon[eui]["trademark"].append(chem)
-    return lexicon
+                lexicon[eui]["trademark"] = set()
+            lexicon[eui]["trademark"].add(chem)
+
+    return set_to_list(lexicon, "trademark")
 
 
 def add_nominalization(lexicon):
@@ -124,16 +144,17 @@ def add_nominalization(lexicon):
         for l in f:
             vals = l.strip().split('|')
             eui = vals[0]
-            nom = vals[1]
+            nom = convert_to_ascii_on_unicode_error(vals[1])
 
             if eui not in lexicon:
                 print "WARNING! Attempt nominalization, but %s is not in the lexicon!" % eui
                 continue
 
             if "nominalization" not in lexicon[eui]:
-                lexicon[eui]["nominalization"] = []
-            lexicon[eui]["nominalization"].append(nom)
-    return lexicon
+                lexicon[eui]["nominalization"] = set()
+            lexicon[eui]["nominalization"].add(nom)
+
+    return set_to_list(lexicon, "nominalization")
 
 
 def add_spelling_variants(lexicon):
@@ -143,16 +164,18 @@ def add_spelling_variants(lexicon):
         for l in f:
             vals = l.strip().split('|')
             eui = vals[0]
-            spell_var = vals[1]
+            spell_var = convert_to_ascii_on_unicode_error(vals[1])
 
             if eui not in lexicon:
                 print "WARNING! Attempt spelling variant, but %s is not in the lexicon!" % eui
                 continue
 
             if "spelling variants" not in lexicon[eui]:
-                lexicon[eui]["spelling variants"] = []
-            lexicon[eui]["spelling variants"].append(spell_var)
-    return lexicon
+                lexicon[eui]["spelling variants"] = set()
+            lexicon[eui]["spelling variants"].add(spell_var)
+
+    return set_to_list(lexicon, "spelling variants")
+
 
 def add_inflection_variants(lexicon):
 
@@ -161,7 +184,7 @@ def add_inflection_variants(lexicon):
         for l in f:
             vals = l.strip().split('|')
             eui = vals[0]
-            infl_var = vals[1]
+            infl_var = convert_to_ascii_on_unicode_error(vals[1])
 
             if eui not in lexicon:
                 print "WARNING! Attempting inflection variant, %s is not in the lexicon!" % eui
@@ -171,9 +194,10 @@ def add_inflection_variants(lexicon):
                 continue
 
             if "inflection variants" not in lexicon[eui]:
-                lexicon[eui]["inflection variants"] = []
-            lexicon[eui]["inflection variants"].append(infl_var)       
-    return lexicon
+                lexicon[eui]["inflection variants"] = set()
+            lexicon[eui]["inflection variants"].add(infl_var) 
+
+    return set_to_list(lexicon, "inflection variants")
 
     
 def parse_LEXICON(lex_loc):

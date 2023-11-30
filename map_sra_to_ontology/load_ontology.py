@@ -20,6 +20,7 @@ def load(ontology_index):
     ont_to_loc = {x:y for x,y 
         in config.ontology_name_to_location().iteritems() 
         if x in include_ontologies}
+
     og = ontology_graph.build_ontology(ont_to_loc, 
         restrict_to_idspaces=restrict_to_idspaces,
         include_obsolete=False, 

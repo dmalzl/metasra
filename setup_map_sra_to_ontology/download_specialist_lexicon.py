@@ -4,6 +4,7 @@ import subprocess
 import json
 import os
 from os.path import join
+from remove_non_unicode_characters import remove_non_unicode_characters
 
 def main():
     parser = OptionParser()
@@ -19,7 +20,9 @@ def main():
         for lex_f, url in json.load(f).iteritems():
             lex_f_name = join(lex_rel_loc, "%s" % lex_f)
             output_f = open(lex_f_name, "w")
-            subprocess.call(["curl", url], stdout=output_f)   
+            subprocess.call(["curl", url], stdout=output_f)  
+            remove_non_unicode_characters(lex_f_name)
+
 
 if __name__ == "__main__":
     main()

@@ -4,6 +4,7 @@ import subprocess
 import json
 import os
 from os.path import join
+from remove_non_unicode_characters import remove_non_unicode_characters
 
 def main():
     parser = OptionParser()
@@ -18,11 +19,11 @@ def main():
             obo_f_name = join(obo_rel_loc, "%s.%s.obo" % (ont_prefix, date_str))
             output_f = open(obo_f_name, "w")
             subprocess.call(["curl", url], stdout=output_f)   
+            remove_non_unicode_characters(obo_f_name)
             prefix_to_filename[ont_prefix] = "%s.%s.obo" % (ont_prefix, date_str)
 
     with open("../map_sra_to_ontology/ont_prefix_to_filename.json", "w") as f:
         f.write(json.dumps(prefix_to_filename, indent=4, separators=(',', ': '))) 
-    
     
 
 if __name__ == "__main__":

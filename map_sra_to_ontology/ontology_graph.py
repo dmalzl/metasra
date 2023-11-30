@@ -459,7 +459,18 @@ def parse_entity(lines, restrict_to_idspaces):
         for syn in raw_syns:
             m = re.search('\".+\"', syn)
             if m:
-                syn_type = syn.split('"')[2].strip().split()[0]
+                try:
+                    syn_type = syn.split('"')[2].strip().split()[0]
+                
+                # this is necessary because ChEBI seems to contain escaped quotes
+                # this only works for the trailing double quotes of the synonym
+                except IndexError:
+                    print "removing trailing double quotes for synonym {}".format(syn)
+                    syn_parts = syn.split('"')
+                    syn_parts[1] = syn_parts[1][:-1]
+                    processed_syn = '"'.join(syn_parts[:3]) + ''.join(syn_parts[3:])
+                    syn_type = processed_syn.split('"')[2].strip().split()[0]
+
                 parsed_syn = m.group(0)[1:-1].strip()
                 synonyms.add(Synonym(parsed_syn, syn_type))
         return synonyms
