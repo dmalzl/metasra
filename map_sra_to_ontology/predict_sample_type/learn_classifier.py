@@ -324,10 +324,14 @@ def ont_term_features(
 
 
 def get_ngrams(text, n):
-
     delimiters = ["_", "/", "-"]
     for delim in delimiters:
         text = text.replace(delim, " ")
+
+    # dirty workaround for an index error during last stage
+    # when text contains a trailing "''"
+    if text[-2:] == "''":
+        text = text[:-2] + '"'
 
     words = nltk.word_tokenize(text)
 
@@ -367,10 +371,11 @@ def get_ngrams(text, n):
         if word_char_i == len(words[word_i]):
             word_i += 1
             word_char_i = 0
+
         if word_i == len(words):
             break
 
-        if text[text_i] ==  words[word_i][word_char_i]:
+        if text[text_i] == words[word_i][word_char_i]:
             word_to_text_indices[word_i].append(text_i)
             word_char_i += 1 
 
